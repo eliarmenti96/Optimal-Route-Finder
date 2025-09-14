@@ -1,3 +1,5 @@
+# 🚗 Optimal Route Finder #
+
 Questo progetto calcola il percorso ottimale tra città utilizzando l’algoritmo di **Dijkstra**.  
 A ogni rotta sono associati **tempo**, **consumo di carburante** e **rischio**, e il programma permette di inserire città di partenza e arrivo per ottenere il percorso migliore in base a una funzione di costo personalizzabile.
 
