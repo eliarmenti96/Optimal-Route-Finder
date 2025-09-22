@@ -1,96 +1,106 @@
-import heapq
+import gpxpy
+import gpxpy.gpx
 
-# Lista delle rotte
-routes = [
-    {"from": "A", "to": "B", "time": 15, "fuel": 1.2, "risk": 3},
-    {"from": "A", "to": "C", "time": 10, "fuel": 1.0, "risk": 5},
-    {"from": "B", "to": "D", "time": 12, "fuel": 1.1, "risk": 4},
-    {"from": "C", "to": "D", "time": 8,  "fuel": 0.9, "risk": 2},
-    {"from": "C", "to": "E", "time": 20, "fuel": 1.6, "risk": 6},
-    {"from": "D", "to": "E", "time": 6,  "fuel": 0.5, "risk": 3},
-    {"from": "E", "to": "F", "time": 9,  "fuel": 0.7, "risk": 4},
-    {"from": "B", "to": "F", "time": 30, "fuel": 2.5, "risk": 7},
-    {"from": "A", "to": "F", "time": 40, "fuel": 3.0, "risk": 9}
-]
+gpx_file1 = open('paths/biroto_RT00000111_1f.gpx', 'r')
+gpx_file2 = open('paths/biroto_RT00000238_1f.gpx', 'r')
+gpx_file3 = open('paths/biroto_RT00000260_1f.gpx', 'r')
+gpx_file4 = open('paths/biroto_RT00000018_1f.gpx', 'r')
 
-# Funzione per costruire il grafo
-def build_graph(routes):
-    grafo = {}
-    for route in routes:
-        a, b = route["from"], route["to"]
-        time, fuel, risk = route["time"], route["fuel"], route["risk"]
-        grafo.setdefault(a, []).append((b, time, fuel, risk))
-        grafo.setdefault(b, []).append((a, time, fuel, risk))  # bidirezionale
-    return grafo
+gpx1 = gpxpy.parse(gpx_file1)
+gpx2 = gpxpy.parse(gpx_file2)
+gpx3 = gpxpy.parse(gpx_file3)
+gpx4 = gpxpy.parse(gpx_file4)
 
-# Funzione per calcolare il peso personalizzato
-def cost(time, fuel, risk, w_time=1, w_fuel=0.7, w_risk=0.8):
-    return time * w_time + fuel * w_fuel + risk * w_risk
+for track in gpx1.tracks:
+    for segment in track.segments:
+        for point in segment.points:
+            print('Point at ({0},{1}) -> {2}'.format(point.latitude, point.longitude, point.elevation))
 
-# Algoritmo di Dijkstra
-def dijkstra(grafo, start, cost_function):
-    distanze = {nodo: float('inf') for nodo in grafo}
-    distanze[start] = 0
-    predecessori = {nodo: None for nodo in grafo}
-    coda = [(0, start)]
+for track in gpx2.tracks:
+    for segment in track.segments:
+        for point in segment.points:
+            print('Point at ({0},{1}) -> {2}'.format(point.latitude, point.longitude, point.elevation))
 
-    while coda:
-        distanza_corrente, nodo_corrente = heapq.heappop(coda)
+for track in gpx3.tracks:
+    for segment in track.segments:
+        for point in segment.points:
+            print('Point at ({0},{1}) -> {2}'.format(point.latitude, point.longitude, point.elevation))
 
-        if distanza_corrente > distanze[nodo_corrente]:
-            continue
+for track in gpx4.tracks:
+    for segment in track.segments:
+        for point in segment.points:
+            print('Point at ({0},{1}) -> {2}'.format(point.latitude, point.longitude, point.elevation))
 
-        for vicino, time, fuel, risk in grafo[nodo_corrente]:
-            peso = cost_function(time, fuel, risk)
-            nuova_distanza = distanza_corrente + peso
+# 1. creazione lista dei gpx
+gpx_list = [gpx1, gpx2, gpx3, gpx4]
 
-            if nuova_distanza < distanze[vicino]:
-                distanze[vicino] = nuova_distanza
-                predecessori[vicino] = nodo_corrente
-                heapq.heappush(coda, (nuova_distanza, vicino))
+# 2. creazione lista delle routes
+routes = []
 
-    return distanze, predecessori
+# Funzione per identificare i nodi chiave (inizio, fine o punti importanti)
 
-# Funzione per ricostruire il percorso
-def ricostruisci_percorso(predecessori, destinazione):
-    percorso = []
-    while destinazione is not None:
-        percorso.append(destinazione)
-        destinazione = predecessori[destinazione]
-    return list(reversed(percorso))
+def get_key_nodes(segment):
+    # Filtra punti non validi (None o senza coordinate)
+    valid_points = [p for p in segment.points if p and p.latitude is not None and p.longitude is not None]
+    if len(valid_points) < 2:
+        return []  # Nessun nodo chiave se meno di 2 punti validi
+    # Prendi inizio e fine (puoi aggiungere altri criteri)
+    return [valid_points[0], valid_points[-1]]
 
 
-# MAIN: interazione con l'utente
-grafo = build_graph(routes)
+def calculate_time(from_node, to_node):
+    # calcola tempo stimato tra due punti
+    return 5  
 
-start = input("Inserisci città di partenza: ").strip().upper()
-end = input("Inserisci città di arrivo: ").strip().upper()
+def calculate_safety(from_node, to_node):
+    # calcola un punteggio di sicurezza
+    return 1  
 
-if start not in grafo or end not in grafo:
-    print("❌ Città non trovata nel grafo.")
-else:
-    # posso modificare qui i pesi per personalizzare il tipo di ottimizzazione
-    distanze, predecessori = dijkstra(grafo, start, lambda t, f, r: cost(t, f, r, w_time=1, w_fuel=0.6, w_risk=1))
+def calculate_height_difference(from_node, to_node):
+    if from_node.elevation is None or to_node.elevation is None:
+        return 0
+    return abs(from_node.elevation - to_node.elevation)
 
-    print(f"\n✅ Distanza ottimizzata da {start} a {end}: {distanze[end]:.2f}")
-    percorso = ricostruisci_percorso(predecessori, end)
-    print(f"📍 Percorso: {' ➜ '.join(percorso)}")
+# 3. Itera su ciascun file GPX e crea le routes
+routes = []
 
-    tempo_tot = 0
-    consumo_tot = 0
-    rischio_tot = 0
+""" for gpx in gpx_list:
+    for track in gpx.tracks:
+        for segment in track.segments:
+            key_nodes = get_key_nodes(segment)
+            if len(key_nodes) < 2:
+                continue  # Salta segmenti vuoti o con nodi invalidi
+            for from_node, to_node in zip(key_nodes, key_nodes[1:]):
+                # Controlla ancora che i nodi non siano None
+                if from_node is None or to_node is None:
+                    continue
+                route = {
+                    'from': from_node,
+                    'to': to_node,
+                    'time': calculate_time(from_node, to_node),
+                    'safety': calculate_safety(from_node, to_node),
+                    'height_difference': calculate_height_difference(from_node, to_node)
+                }
+                routes.append(route) """
 
-    for i in range(len(percorso) - 1):
-        partenza = percorso[i]
-        arrivo = percorso[i + 1]
-    
-        for route in routes:
-            if (route["from"] == partenza and route["to"] == arrivo) or (route["from"] == arrivo and route["to"] == partenza):
-                tempo_tot += route["time"]
-                consumo_tot += route["fuel"]
-                rischio_tot += route["risk"]
-                break
-    
-    print(f"⏱ Tempo totale: {tempo_tot} min")
-    print(f"⛽ Consumo totale: {consumo_tot} litri")
-    print(f"⚠️ Rischio totale: {rischio_tot}")
+for gpx in gpx_list:
+    for track in gpx.tracks:
+        for segment in track.segments:
+            key_nodes = get_key_nodes(segment)
+            if not key_nodes:
+                continue
+            for from_node, to_node in zip(key_nodes, key_nodes[1:]):
+                route = {
+                    'from': from_node,
+                    'to': to_node,
+                    'time': calculate_time(from_node, to_node),
+                    'safety': calculate_safety(from_node, to_node),
+                    'height_difference': calculate_height_difference(from_node, to_node)
+                }
+                routes.append(route)
+
+print(f"Routes generate: {len(routes)}")
+
+# 4. Stampa le routes per verifica
+for route in routes:
+    print(route)
