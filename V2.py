@@ -37,7 +37,7 @@ def calculate_time(from_node, to_node, avg_speed_kmh=20):
 
 def calculate_safety(from_node, to_node):
     """Simulazione punteggio sicurezza (più alto = meglio)."""
-    # puoi aggiungere logiche reali (es. altitudine, urbanità, curve, ecc.)
+    # aggiungo logiche reali (es. altitudine, urbanità, curve, ecc.)
     return 1.0
 
 def calculate_height_difference(from_node, to_node):
@@ -89,3 +89,7 @@ if routes:
     print(f"Punteggio totale: {best_route['score']:.3f}")
 else:
     print("Nessuna route valida trovata.")
+
+
+
+
