@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Risultato Percorso{% endblock %}
+
+{% block content %}
+<div class="card shadow p-4">
+    <h3 class="text-center mb-4">Percorso Calcolato</h3>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h5>🕒 Tempo stimato:</h5>
+            <p>{{ best_route.time_min }} minuti</p>
+
+            <h5>🛡️ Sicurezza:</h5>
+            <p>{{ best_route.safety }}</p>
+
+            <h5>⛰️ Dislivello:</h5>
+            <p>{{ best_route.height_diff_m }} m</p>
+
+            <a href="/" class="btn btn-secondary mt-3">← Torna alla ricerca</a>
+        </div>
+
+        <div class="col-md-6">
+            <h5>Mappa del percorso:</h5>
+            <iframe src="{{ url_for('static', filename='map.html') }}" width="100%" height="400" style="border: none;"></iframe>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Trova il percorso migliore</h2>
+<form method="post">
+    <input type="text" name="start" placeholder="Punto di partenza (nome o lat,lon)" required>
+    <input type="text" name="end" placeholder="Punto di arrivo (nome o lat,lon)" required>
+    <button type="submit">Cerca percorso</button>
+</form>
+<p>Esempio coordinate: <code>47.603325,8.227503</code></p>
+<p>Esempio nome luogo: <code>Lugano</code></p>
+{% endblock %}
